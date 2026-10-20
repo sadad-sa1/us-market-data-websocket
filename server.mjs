@@ -15,6 +15,8 @@ const state = new MarketState();
 const subscriptions = new SubscriptionManager(config.defaultSymbols);
 const clients = new Map();
 let shuttingDown = false;
+let marketMessageCount = 0;
+let lastMarketMessageAt = null;
 let upstreamStatus = { state: missingSecrets.length ? 'not_configured' : 'starting' };
 
 function jsonResponse(res, status, body, extraHeaders = {}) {
@@ -73,6 +75,8 @@ const upstream = missingSecrets.length
       config,
       logger,
       onMarketMessage(message) {
+        marketMessageCount += 1;
+        lastMarketMessageAt = new Date().toISOString();
         const snapshot = state.apply(message);
         if (!snapshot) return;
         const eventType = message.T === 't' ? 'trade' : message.T === 'q' ? 'quote' : 'bar';
@@ -138,6 +142,8 @@ const server = http.createServer((req, res) => {
   if (url.pathname === '/stats') {
     jsonResponse(res, 200, {
       ok: true,
+      marketMessageCount,
+      lastMarketMessageAt,
       clients: clients.size,
       maxClients: config.maxClients,
       maxSymbols: config.maxSymbols,
@@ -216,6 +222,7 @@ wss.on('connection', (ws, req) => {
     }
 
     const before = subscriptions.uniqueSymbols().size;
+    const previousSubscriptions = subscriptions.clientView(id);
     if (message.action === 'subscribe') {
       subscriptions.subscribe(id, message.symbols, message.channels);
     } else {
@@ -223,7 +230,13 @@ wss.on('connection', (ws, req) => {
     }
 
     if (subscriptions.uniqueSymbols().size > config.maxSymbols) {
-      if (message.action === 'subscribe') subscriptions.unsubscribe(id, message.symbols, message.channels);
+      if (message.action === 'subscribe') {
+        subscriptions.removeClient(id);
+        subscriptions.addClient(id);
+        for (const [channel, symbols] of Object.entries(previousSubscriptions)) {
+          subscriptions.subscribe(id, symbols, [channel]);
+        }
+      }
       wsSend(ws, 'error', {
         code: 'symbol_limit_exceeded',
         message: `The gateway supports at most ${config.maxSymbols} unique symbols.`,

@@ -10,8 +10,9 @@
   "scripts": {
     "start": "node server.mjs",
     "test": "node --test tests/*.test.mjs",
-    "check": "node --check src/server.mjs && node --check src/config.mjs && node --check src/logger.mjs && node --check src/protocol.mjs && node --check src/metrics.mjs && node --check src/market-state.mjs && node --check src/subscriptions.mjs && node --check src/alpaca-client.mjs && node --check scripts/smoke-test.mjs",
-    "verify": "npm run check && npm test"
+    "check": "node scripts/check.mjs",
+    "verify": "npm run check && npm test",
+    "smoke": "node scripts/smoke-test.mjs"
   },
   "dependencies": {
     "ws": "8.21.3"

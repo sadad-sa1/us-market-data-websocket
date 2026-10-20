@@ -5,7 +5,7 @@ services:
     plan: free
     region: ohio
     branch: main
-    buildCommand: npm install --omit=dev
+    buildCommand: npm ci --omit=dev && npm run verify
     startCommand: npm start
     healthCheckPath: /health
     autoDeploy: true

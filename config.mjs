@@ -8,7 +8,7 @@ function envString(name, fallback = '') {
 function envInteger(name, fallback, { min = 1, max = Number.MAX_SAFE_INTEGER } = {}) {
   const raw = process.env[name];
   if (raw == null || raw === '') return fallback;
-  const value = Number.parseInt(raw, 10);
+  const value = /^\d+$/.test(raw.trim()) ? Number(raw) : NaN;
   if (!Number.isInteger(value) || value < min || value > max) {
     throw new Error(`${name} must be an integer between ${min} and ${max}`);
   }

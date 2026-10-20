@@ -31,7 +31,7 @@ The `momentum` field is an analytics score from 0–100 based on short-window pr
 
 ## Required environment variables
 
-Copy `.env.example` values into your runtime environment. Never commit real credentials.
+Copy `.env.example` to `.env` locally and fill the required keys, or set them in your runtime environment. `npm start` reads exported environment variables; use `node --env-file=.env server.mjs` to load the local file. Never commit real credentials.
 
 ```text
 ALPACA_API_KEY_ID=...
@@ -51,9 +51,9 @@ The service then connects to Alpaca's test stream and only accepts `FAKEPACA`.
 ## Start locally
 
 ```bash
-npm install
+npm ci
 npm run verify
-npm start
+node --env-file=.env server.mjs
 ```
 
 HTTP endpoints:
@@ -161,3 +161,19 @@ Then connect a WebSocket client to:
 ```text
 wss://YOUR-SERVICE.onrender.com/ws
 ```
+
+## Verification boundaries
+
+`npm run verify` checks the actual root-level modules and runs offline unit/integration tests. It does not contact Alpaca. Tests cover missing credentials, HTTP routes, WebSocket messages, subscription limits and shared subscriptions.
+
+`/health` is liveness only. `/ready` confirms Alpaca authentication, not successful subscriptions or fresh prices. Compare `desired` with `upstream.active` in `/stats`. `marketMessageCount` and `lastMarketMessageAt` track received upstream market events since process start; they are not per-symbol freshness guarantees.
+
+Run a live end-to-end check during the selected feed's session:
+
+```bash
+SMOKE_SYMBOL=AAPL npm run smoke -- https://YOUR-SERVICE.onrender.com --require-data
+```
+
+For test mode use `SMOKE_SYMBOL=FAKEPACA`. Without `--require-data`, smoke checks HTTP readiness and WebSocket hello/pong only. Delayed feeds intentionally may fail the 60-second freshness check.
+
+`ALLOWED_ORIGINS` restricts browser origins, not client authentication. Clients without an Origin header are accepted. Keep credentials server-side.
