@@ -1,0 +1,22 @@
+{
+  "min_price": 0.1,
+  "max_price": 5.0,
+  "min_day_volume": 500000,
+  "min_change_pct": 5.0,
+  "max_spread_pct": 2.0,
+  "quote_age": 15.0,
+  "bar_age": 120.0,
+  "breakout_volume_ratio": 2.0,
+  "momentum_volume_ratio": 2.0,
+  "momentum_5m_pct": 3.0,
+  "breakout_buffer_pct": 0.15,
+  "retest_tolerance_pct": 0.5,
+  "retest_expiry_minutes": 15,
+  "cooldown_minutes": 15,
+  "max_stop_pct": 8.0,
+  "news_age_hours": 72,
+  "require_news": false,
+  "require_verified_metadata": false,
+  "capital": 0.0,
+  "risk_pct": 1.0
+}

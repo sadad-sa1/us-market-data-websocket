@@ -1,0 +1,48 @@
+services:
+  - type: worker
+    name: benzinga-telegram-news-stream
+    runtime: python
+    plan: 0.5c-512mb
+    region: frankfurt
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -u worker.py
+    autoDeployTrigger: off
+    disk:
+      name: news-state
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: COMPOSIO_API_KEY
+        sync: false
+      - key: BENZINGA_ACCOUNT_ID
+        sync: false
+      - key: TELEGRAM_ACCOUNT_ID
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+      - key: NEWS_CHANNELS
+        value: ""
+      - key: MODE
+        value: scanner
+      - key: ALPACA_API_KEY
+        sync: false
+      - key: ALPACA_API_SECRET
+        sync: false
+      - key: ALPACA_FEED
+        value: sip
+      - key: ALPACA_ACCOUNT_MODE
+        value: paper
+      - key: MAX_SYMBOLS
+        value: "30"
+      - key: DISCOVERY_SECONDS
+        value: "300"
+      - key: STRATEGY_FILE
+        value: strategy.json
+      - key: TICKERS
+        value: ""
+      - key: STATE_DB
+        value: /var/data/outbox.sqlite3
+      - key: MAX_NEWS_AGE_SECONDS
+        value: "900"
+      - key: TIMEZONE
+        value: Asia/Riyadh
