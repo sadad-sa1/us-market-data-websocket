@@ -1,8 +1,11 @@
 import http from 'node:http';
 import { WebSocket } from 'ws';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
 const port = Number(process.env.PORT || 10000);
 const token = process.env.BENZINGA_API_KEY;
+const proxyUrl = process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
+const proxyAgent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
 const state = { connected: false, messages: 0, lastMessageAt: null, lastError: null, lastEvent: null };
 let socket, retryTimer, pingTimer, retryCount = 0;
 let shuttingDown = false;
@@ -11,7 +14,7 @@ function connect() {
   if (!token || shuttingDown) return;
   const u = new URL('wss://api.benzinga.com/api/v1/news/stream');
   u.searchParams.set('token', token);
-  socket = new WebSocket(u.toString(), { handshakeTimeout: 15000 });
+  socket = new WebSocket(u.toString(), { handshakeTimeout: 15000, agent: proxyAgent });
   socket.on('open', () => {
     retryCount = 0;
     state.connected = true;

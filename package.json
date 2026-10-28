@@ -15,6 +15,7 @@
     "smoke": "node scripts/smoke-test.mjs"
   },
   "dependencies": {
+    "https-proxy-agent": "9.1.0",
     "ws": "8.21.3"
   }
 }
